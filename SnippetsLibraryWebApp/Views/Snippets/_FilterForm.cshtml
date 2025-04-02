@@ -1,0 +1,76 @@
+﻿<!-- Views/Snippets/_FilterForm.cshtml -->
+@{
+    // Переконайтесь, що ViewBag.Categories та ViewBag.ProgrammingLanguages заповнені
+}
+
+<div class="filter-form">
+    @if (ViewBag.PageType != "MySnippets")
+    {
+        <!-- Фільтр за авторами -->
+        <div class="filter-item">
+            <label for="authorsFilter">Автори</label>
+            <div class="dropdown-container" id="authorsFilter">
+                <input type="text" id="authorSearch" class="form-control" placeholder="Пошук авторів..." autocomplete="off" />
+                <div class="dropdown-list" id="authorDropdown"></div>
+            </div>
+            <div class="selected-filters" id="selectedAuthors"></div>
+        </div>
+    }
+
+    <!-- Фільтр за категоріями -->
+    <div class="filter-item">
+        <label for="categoriesFilter">Категорії</label>
+        <div class="dropdown-container" id="categoriesFilter">
+            <input type="text" id="categorySearch" class="form-control" placeholder="Пошук категорій..." autocomplete="off" />
+            <div class="dropdown-list" id="categoryDropdown">
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <div class="dropdown-item" data-id="@category.ID">@category.Name</div>
+                }
+            </div>
+        </div>
+        <div class="selected-filters" id="selectedCategories"></div>
+    </div>
+
+    <!-- Фільтр за тегами -->
+    <div class="filter-item">
+        <label for="tagsFilter">Теги</label>
+        <div class="dropdown-container" id="tagsFilter">
+            <input type="text" id="tagSearch" class="form-control" placeholder="Пошук тегів..." autocomplete="off" />
+            <div class="dropdown-list" id="tagDropdown"></div>
+        </div>
+        <div class="selected-filters" id="selectedTags"></div>
+    </div>
+
+    <!-- Фільтр за мовами програмування -->
+    <div class="filter-item">
+        <label for="languagesFilter">Мови програмування</label>
+        <div class="dropdown-container" id="languagesFilter">
+            <input type="text" id="languageSearch" class="form-control" placeholder="Пошук мов програмування..." autocomplete="off" />
+            <div class="dropdown-list" id="languageDropdown">
+                @foreach (var language in ViewBag.ProgrammingLanguages)
+                {
+                    <div class="dropdown-item" data-id="@language.ID">@language.Name</div>
+                }
+            </div>
+        </div>
+        <div class="selected-filters" id="selectedLanguages"></div>
+    </div>
+
+    <!-- Сортування -->
+    <div class="filter-item">
+        <label for="sortOrder">Сортування</label>
+        <select id="sortOrder" class="form-control">
+            <option value="">За замовчуванням</option>
+            <option value="date_desc">Дата: Новіші спочатку</option>
+            <option value="date_asc">Дата: Старіші спочатку</option>
+            <option value="name_asc">Назва: A-Z</option>
+            <option value="name_desc">Назва: Z-A</option>
+            <option value="favorite_asc">Спочатку менш популярні</option>
+            <option value="favorite_desc">Спочатку більш популярн</option>
+        </select>
+    </div>
+
+    <!-- Кнопка для застосування фільтрів -->
+    <button id="applyFilters" class="primary-btn">Застосувати фільтри</button>
+</div>

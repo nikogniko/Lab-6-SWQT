@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Усі сніпети";
+    @model IEnumerable<SnippetsLibraryWebApp.Models.SnippetModel>
+}
+
+<!-- Список сніпетів -->
+<section class="snippets-list">
+    <div class="container">
+        <h1>Усі сніпети</h1>
+        @await Html.PartialAsync("_SnippetList", Model)
+    </div>
+</section>

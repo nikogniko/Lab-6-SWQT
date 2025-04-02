@@ -1,0 +1,115 @@
+﻿@using SnippetsLibraryWebApp.Repository;
+@inject ProgrammingLanguageRepository _programmingLanguageRepository;
+@inject CategoryRepository _categoryRepository;
+@inject TagRepository _tagRepository;
+
+@{
+    ViewData["Title"] = "Додати новий сніпет";
+}
+
+<div class="page-container">
+    <h1 class="page-title">Додати новий сніпет</h1>
+    <div class="form-sections-container">
+        <!-- Перша частина з деталями сніпета -->
+        <div class="form-details-section">
+            <form asp-action="AddSnippet" method="post">
+                <div class="form-group">
+                    <label for="Title">Назва <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="Title" name="Title" placeholder="Придумайте лаконічну назву..." required />
+                </div>
+
+                <div class="form-group">
+                    <label for="ProgrammingLanguageID">Мова програмування <span class="required">*</span></label>
+                    <select class="form-control select-search" id="ProgrammingLanguageID" name="ProgrammingLanguageID"  required>
+                        <option value="" selected>-- Оберіть мову --</option>
+                        @foreach (var language in await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync())
+                        {
+                            <option value="@language.ID">@language.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Статус <span class="required">*</span></label>
+                    <div class="status-toggle-group">
+                        <input type="radio" id="statusPublic" name="Status" value="Public" required />
+                        <label for="statusPublic" class="toggle-label">Public</label>
+                        <input type="radio" id="statusPrivate" name="Status" value="Private" required />
+                        <label for="statusPrivate" class="toggle-label">Private</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Description">Опис</label>
+                    <textarea class="form-control" id="Description" name="Description" placeholder="Опишіть, що виконує даний сніпет..."></textarea>
+                </div>
+
+                <div class="form-group category-select-container">
+                    <label for="Categories">Категорії</label>
+                    <div id="categoryDropdown" class="custom-dropdown">
+<<<<<<< HEAD
+                        <span class="dropdown-placeholder">-- Оберіть до 3-х категорій --</span>
+                        <div id="dropdownList" class="dropdown-content">
+                            @foreach (var category in await _categoryRepository.GetAllCategoriesAsync())
+=======
+                        <span class="dropdown-placeholder">--Оберіть до 3-х категорій--</span>
+                        <div id="dropdownCategoryList" class="dropdown-content">
+                            @foreach (var category in _categoryRepository.GetAllCategories())
+>>>>>>> 92926191b060c73058710307ce77050b62882efe
+                            {
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="category-checkbox" value="@category.ID" />
+                                    @category.Name
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div id="selectedCategories" class="selected-list"></div>
+                </div>
+
+<<<<<<< HEAD
+                <div class="form-group">
+                    <label>Теги</label>
+                    <select class="select-search" id="Tags" name="Tags" multiple>
+                        @foreach (var tag in await _tagRepository.GetAllTagsAsync())
+                        {
+                            <option value="@tag.ID">@tag.Name</option>
+                        }
+                    </select>
+=======
+                <div class="form-group tag-select-container">
+                    <label for="Tags">Теги</label>
+                    <div id="tagDropdown" class="custom-dropdown">
+                        <span class="dropdown-placeholder">--Оберіть теги--</span>
+                        <div id="dropdownTagList" class="dropdown-content">
+                            @foreach (var tag in _tagRepository.GetAllTags())
+                            {
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="tag-checkbox" value="@tag.ID" />
+                                    @tag.Name
+                                </label>
+                            }
+                        </div>
+                    </div>
+>>>>>>> 92926191b060c73058710307ce77050b62882efe
+                    <div id="selectedTags" class="selected-list"></div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Друга частина з блоком коду -->
+        <div class="form-code-section">
+            <div class="form-group">
+                <label for="Code">Код <span class="required">*</span></label>
+                <div class="code-editor-container">
+                    <textarea id="Code" name="Code" class="CodeMirror" required style="min-width:500px; max-width: 500px"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include addSnippet.js -->
+@section Scripts {
+
+}

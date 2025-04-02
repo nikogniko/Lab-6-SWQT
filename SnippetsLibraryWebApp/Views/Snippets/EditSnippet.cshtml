@@ -1,0 +1,127 @@
+﻿@using System.Security.Claims
+@using SnippetsLibraryWebApp.Repository
+@model SnippetsLibraryWebApp.ViewModels.EditSnippetViewModel
+@inject ProgrammingLanguageRepository _programmingLanguageRepository
+@{
+    ViewData["Title"] = "Редагувати сніпет";
+}
+
+<div class="page-container">
+    <h1 class="page-title">Редагувати сніпет</h1>
+    <div class="form-sections-container">
+        <!-- Перша частина з деталями сніпета -->
+        <div class="form-details-section">
+            <form id="editSnippetForm" asp-action="EditSnippet" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ID" value="@Model.ID" />
+
+                <!-- Назва -->
+                <div class="form-group">
+                    <label for="Title">Назва <span class="required">*</span></label>
+                    <textarea type="text" class="form-control" id="Title" name="Title" placeholder="Придумайте лаконічну назву..." required>@Model.Title</textarea>
+                </div>
+
+                <!-- Мова Програмування -->
+                <div class="form-group">
+                    <label for="ProgrammingLanguageID">Мова програмування <span class="required">*</span></label>
+                    @Html.DropDownListFor(model => model.ProgrammingLanguageID, Model.ProgrammingLanguages, "-- Оберіть мову --", new { @class = "select-search", required = "required" })
+                </div>
+
+                <!-- Статус -->
+                <div class="form-group">
+                    <label>Статус <span class="required">*</span></label>
+                    <div class="status-toggle-group">
+                        <input type="radio" id="statusPublic" name="Status" value="Public" required @(Model.Status.Equals("Public", StringComparison.OrdinalIgnoreCase) ? "checked=\"checked\"" : "") />
+                        <label for="statusPublic" class="toggle-label">Public</label>
+                        <input type="radio" id="statusPrivate" name="Status" value="Private" required @(Model.Status.Equals("Private", StringComparison.OrdinalIgnoreCase) ? "checked=\"checked\"" : "") />
+                        <label for="statusPrivate" class="toggle-label">Private</label>
+                    </div>
+                </div>
+
+                <!-- Опис -->
+                <div class="form-group">
+                    <label for="Description">Опис</label>
+                    <textarea class="form-control" id="Description" name="Description" placeholder="Опишіть, що виконує даний сніпет...">@Model.Description</textarea>
+                </div>
+
+                <!-- Категорії -->
+                <div class="form-group category-select-container">
+                    <label for="Categories">Категорії</label>
+                    <div id="categoryDropdown" class="custom-dropdown">
+                        <span class="dropdown-placeholder">-- Оберіть до 3-х категорій --</span>
+                        <div id="dropdownCategoryList" class="dropdown-content">
+                            @foreach (var category in Model.AllCategories)
+                            {
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="category-checkbox" name="selectedCategories" value="@category.Value" @(category.Selected ? "checked=\"checked\"" : "") />
+                                    @category.Text
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div id="selectedCategories" class="selected-list">
+                        @foreach (var category in Model.Categories)
+                        {
+                            <span class="selected-category" data-id="@category.ID">@category.Name <span class="remove-category">×</span></span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Теги -->
+                <div class="form-group tag-select-container">
+                    <label for="Tags">Теги</label>
+                    <div id="tagDropdown" class="custom-dropdown">
+                        <span class="dropdown-placeholder">--Оберіть теги--</span>
+                        <div id="dropdownTagList" class="dropdown-content">
+                            @foreach (var tag in Model.AllTags)
+                            {
+                                <label class="checkbox-label">
+                                    <input type="checkbox" class="tag-checkbox" name="selectedTags" value="@tag.Value" @(tag.Selected ? "checked=\"checked\"" : "") />
+                                    @tag.Text
+                                </label>
+                            }
+                        </div>
+                    </div>
+                    <div id="selectedTags" class="selected-list">
+                        @foreach (var tag in Model.Tags)
+                        {
+                            <span class="selected-tag" data-id="@tag.ID">@tag.Name <span class="remove-tag">×</span></span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Додавання Нових Тегів -->
+                <div class="form-group">
+                    <div class="add-tag-container">
+                        <input type="text" class="form-control add-tag-field" id="addTag" name="addTag" placeholder="Додайте власний тег за потреби..." />
+                        <button type="button" id="addTagBtn" class="secondary-btn">Додати</button>
+                    </div>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="form-group form-buttons">
+                    <button type="submit" id="saveSnippet" class="btn primary-btn">Зберегти</button>
+                    <a href="@Url.Action("AllSnippets", "Snippets")" class="btn secondary-btn">Відмінити</a>
+                </div>
+            </form>
+
+            <script>
+                var userID = '@int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)';
+                var languageName = '@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)';
+            </script>
+        </div>
+
+        <!-- Друга частина з блоком коду -->
+        <div class="form-code-section">
+            <div class="form-group">
+                <label for="Code">Код <span class="required">*</span></label>
+                <div class="code-editor-container">
+                    <textarea id="Code" name="Code" class="CodeMirror" required style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>

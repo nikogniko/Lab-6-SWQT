@@ -1,0 +1,294 @@
+﻿@model SnippetsLibraryWebApp.Models.SnippetModel
+@using SnippetsLibraryWebApp.Repository
+@using System.Security.Claims
+@inject ProgrammingLanguageRepository _programmingLanguageRepository
+@inject UserRepository _userRepository
+@inject CategoryRepository _categoryRepository
+@inject TagRepository _tagRepository
+@inject SnippetRepository _snippetRepository
+
+@{
+    ViewData["Title"] = "Деталі сніпета";
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    bool isSaved = false;
+
+    if (User.Identity.IsAuthenticated)
+    {
+        // Перевірка, чи сніпет вже збережено користувачем
+        isSaved = await _snippetRepository.IsSnippedSavedByUser(int.Parse(userId), Model.ID);
+    }
+}
+
+<div class="page-container">
+    <h1 class="page-title">Перегляд інформації про сніпет</h1>
+    <div class="form-sections-container">
+        <!-- Перша частина з деталями сніпета -->
+        <div class="form-details-section">
+            <form asp-action="Details" method="get">
+                <div class="form-group">
+                    <label for="Title">Назва</label>
+                    <label type="text" class="form-control" name="Title">@Model.Title</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="ProgrammingLanguageID">Мова програмування</label>
+                    <span class="selected-category">@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Статус</label>
+                    <div class="status-toggle-group">
+                        <span class="selected-category">@string.Join("", Model.Status.Substring(0, 1).ToUpper(), Model.Status.Substring(1).ToLower())</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Description">Опис</label>
+                    <label class="form-control" name="Description">@Model.Description</label>
+                </div>
+
+                <div class="form-group category-select-container">
+                    <label for="Categories">Категорії</label>
+                    <div class="selected-list">
+                        @foreach (var category in await _categoryRepository.GetCategoriesBySnippetIdAsync(Model.ID))
+                        {
+                            <span class="selected-category" data-id="@category.ID">@category.Name</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group tag-select-container">
+                    <label for="Tags">Теги</label>
+                    <div class="selected-list">
+                        @foreach (var tag in await _tagRepository.GetTagsBySnippetIdAsync(Model.ID))
+                        {
+                            <span class="selected-tag" data-id="@tag.ID">@tag.Name</span>
+                        }
+                    </div>
+                </div>
+
+@*                 <div class="form-group form-buttons">
+                    <a href="@Url.Action("AllSnippets", "Snippets")" class="btn secondary-btn">Повернутися до списку</a>
+                    @if(Model.AuthorID == Convert.ToInt32(userId))
+                    {
+                        <a href="/Snippets/EditSnippet/@Model.ID" class="btn secondary-btn">Редагувати</a>
+                        <button type="button" id="deleteSnippet" class="btn secondary-btn" data-snippet-id="@Model.ID">Видалити</button>
+                    }
+                </div> *@
+            </form>
+        </div>
+
+        <!-- Друга частина з блоком коду -->
+        <div class="form-code-section">
+            <div class="form-group">
+                <table style="width:100%; align-self:stretch; align-content:stretch">
+                    <tr>
+                        <td>
+                            <label for="ViewCode">Код</label>
+                        </td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="width: 100%"></td>
+                        <td style="align-content:flex-end">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <div class="form-check form-switch ms-3">
+                                    <input class="form-check-input" style="display: none" type="checkbox" id="saveSnippetSwitch" @(isSaved ? "checked" : "") data-snippet-id="@Model.ID">
+                                    <label class="form-check-label" for="saveSnippetSwitch">
+                                        @if (isSaved)
+                                        {
+                                            <i class="fas fa-star text-warning"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star text-muted"></i>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                </table>
+                <div class="code-editor-container">
+                    <textarea id="ViewCode" name="ViewCode" class="CodeMirror" style="min-width:500px; max-width: 500px">@Html.Raw(Model.Code)</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-buttons edit-del-btn">
+        <a href="@Url.Action("AllSnippets", "Snippets")" class="btn primary-btn">Повернутися до списку</a>
+        <div>
+            @if (Model.AuthorID == Convert.ToInt32(userId))
+            {
+                <a href="/Snippets/EditSnippet/@Model.ID" class="btn primary-btn">Редагувати</a>
+                <button type="button" id="deleteSnippet" class="btn dark-btn" data-snippet-id="@Model.ID">Видалити</button>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Підключення Font Awesome для іконок -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<!-- Підключення CodeMirror JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+<!-- CodeMirror Основний CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.5/codemirror.min.css">
+<!-- Мови CodeMirror (наприклад, JavaScript, Python, тощо) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/shell/shell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/php/php.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/swift/swift.min.js"></script>
+<!-- Додаткові плагіни CodeMirror (опціонально) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"></script>
+
+<!-- Теми CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/monokai.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/eclipse.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+<!-- Ініціалізація CodeMirror -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var codeTextarea = document.getElementById("ViewCode");
+        var language = "@((await _programmingLanguageRepository.GetLanguageByIdAsync(Model.ProgrammingLanguageID)).Name)";
+
+        const modeMap = {
+            bash: "shell",
+            c: "text/x-csrc", // Режим для C
+            csharp: "text/x-csharp", // Режим для C#
+            cpp: "text/x-c++src", // Режим для C++
+            css: "css",
+            dart: "dart",
+            elixir: "plaintext",
+            erlang: "plaintext",
+            fsharp: "plaintext",
+            go: "go",
+            groovy: "plaintext",
+            haskell: "plaintext",
+            html: "htmlmixed",
+            java: "text/x-java", // Режим для Java
+            javascript: "javascript",
+            json: "application/json",
+            julia: "plaintext",
+            kotlin: "plaintext",
+            lua: "lua",
+            matlab: "plaintext",
+            objectivec: "text/x-objectivec", // Режим для Objective-C
+            other: "plaintext",
+            perl: "perl",
+            php: "php",
+            plsql: "sql",
+            powershell: "plaintext",
+            python: "python",
+            r: "plaintext",
+            ruby: "ruby",
+            rust: "rust",
+            scala: "plaintext",
+            shell: "shell",
+            sql: "sql",
+            swift: "swift",
+            tsql: "sql",
+            typescript: "javascript",
+            vbnet: "plaintext",
+            xml: "xml",
+            yaml: "yaml",
+        };
+
+        language = language == "C#" ? "csharp" :
+            language == "C++" ? "cpp" :
+                language == "F#" ? "fsharp" :
+                    language == "VB.NET" ? "vbnet" :
+                        language == "PL/SQL" ? "plsql" :
+                            language == "Objective-C" ? "objectivec" :
+                                language == "T-SQL" ? "tsql" :
+                                    language == "Visual Basic" ? "vbnet" :
+                                        language == "Shell script" ? "shell" : language
+
+        var mode = modeMap[language.toString().toLowerCase()] || "plaintext"
+
+        var editor = CodeMirror.fromTextArea(codeTextarea, {
+            lineNumbers: true,
+            mode: mode,
+            theme: "monokai",
+            readOnly: true, // Робить редактор не редагованим
+            viewportMargin: Infinity // Розгортає редактор на весь контент
+        });
+
+        // Обробка події перемикання
+        var saveSwitch = document.getElementById("saveSnippetSwitch");
+        saveSwitch.addEventListener("change", function () {
+            var snippetId = this.getAttribute("data-snippet-id");
+            var isChecked = this.checked;
+
+            $.ajax({
+                url: '@Url.Action("AddSnippetToSavedAsync", "Snippets")',
+                type: 'POST',
+                data: {
+                    userId: '@userId',
+                    snippetId: snippetId
+                },
+                success: function (response) {
+                    if(!response.success) {
+                        alert("Виникла помилка!")
+                        return;
+                    }
+
+                    // Зміна стану перемикача
+                    saveSwitch.checked = response.isSaved;
+
+                    if (response.isSaved) {
+                        saveSwitch.nextElementSibling.innerHTML = '<i class="fas fa-star text-warning"></i>';
+                    } else {
+                        saveSwitch.nextElementSibling.innerHTML = '<i class="far fa-star text-muted"></i>';
+                    }
+                },
+                error: function () {
+                    alert("Сталася помилка при обробці вашого запиту.");
+                    // Відкотити стан перемикача
+                    saveSwitch.checked = !isChecked;
+                }
+            });
+        });
+
+        $("#deleteSnippet").on("click", function () {
+            debugger;
+            var snippetId = this.getAttribute("data-snippet-id");
+
+            // Підтвердження перед видаленням
+            if (confirm("Ви впевнені, що хочете видалити цей сніпет?")) {
+                $.ajax({
+                    url: "/Snippets/DeleteSnippet",
+                    type: "POST",
+                    data: { ID: snippetId },
+                    // contentType: "application/json; charset=utf-8",
+                    headers: {
+                        "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() // CSRF-токен
+                    },
+                    success: function (response) {
+                        // Перенаправлення на сторінку зі списком всіх сніпетів після успішного видалення
+                        window.location.href = "/Snippets/AllSnippets";
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 403) {
+                            alert("Ви не маєте прав на видалення цього сніпета.");
+                        } else if (xhr.status === 404) {
+                            alert("Сніпет не знайдено.");
+                        } else {
+                            alert("Виникла помилка при спробі видалити сніпет.");
+                        }
+                    }
+                });
+            }
+        });
+
+    });
+</script>

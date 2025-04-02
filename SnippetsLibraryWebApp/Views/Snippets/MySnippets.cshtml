@@ -1,0 +1,22 @@
+﻿<!-- Views/Snippets/MySnippets.cshtml -->
+@model IEnumerable<SnippetsLibraryWebApp.Models.SnippetModel>
+@{
+    ViewData["Title"] = "Мої сніпети";
+}
+
+<div class="snippetss-container">
+    <div class="snip-page-title-block">
+        <h1>Мої сніпети</h1>
+        <button class="filter-button"></button>
+    </div>
+
+    <!-- Вказівка на поточну сторінку для JavaScript -->
+    <div id="currentPage" data-page="MySnippets"></div>
+
+    @await Html.PartialAsync("_FilterForm")
+
+    <!-- Контейнер для сніпетів -->
+    <div id="snippetsContent">
+        @await Html.PartialAsync("_SnippetList", Model)
+    </div>
+</div>

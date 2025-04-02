@@ -1,0 +1,6 @@
+.vs
+/SnippetsLibraryWebApp/bin
+/SnippetsLibraryWebApp/obj
+/SnippetsLibraryWebApp/appsettings.Development.json
+/SnippetsLibraryWebApp/appsettings.json
+.sonarqube/

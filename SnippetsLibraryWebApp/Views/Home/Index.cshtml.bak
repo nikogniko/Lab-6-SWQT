@@ -1,0 +1,76 @@
+﻿@* index.cshtml *@
+@{
+    ViewData["Title"] = "All snippets";
+}
+
+<!-- Registration Modal -->
+<div id="registerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+<<<<<<< HEAD
+        <span id="closeModal" class="close" ng-click="closeRegisterModal()">&times;</span>
+=======
+        <span class="close close-register-modal">&times;</span>
+>>>>>>> 92926191b060c73058710307ce77050b62882efe
+        <h2 class="modal-title">Реєстрація</h2>
+        <form id="registerForm" novalidate>
+            <div class="form-group">
+                <label for="registerUsername">Нікнейм</label>
+                <input type="text" id="registerUsername" name="registerUsername" class="form-input" required minlength="3" />
+                <small class="error-message" style="display: none; color: red;">
+                    Нікнейм користувача повинен містити мінімум 3 символи
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" name="registerEmail" class="form-input" required />
+                <small class="error-message" style="display: none; color: red;">
+                    Введіть коректну адресу електронної пошти
+                </small>
+            </div>
+            <div class="form-group password-group">
+                <label for="registerPassword">Пароль</label>
+                <div class="password-wrapper">
+                    <input type="password" id="registerPassword" name="registerPassword" class="form-input" required minlength="8" maxlength="25" />
+                </div>
+                <small class="error-message" style="display: none; color: red;">
+                    Пароль повинен містити 8-25 латинських літер або цифр
+                </small>
+            </div>
+            <div class="register-btns-group">
+                <button type="button" class="secondary-btn btn-to-login">Вже зареєстровані?</button>
+                <button type="submit" class="primary-btn btn-form-register">Зареєструватися</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close close-login-modal">&times;</span>
+        <h2 class="modal-title">Вхід в систему</h2>
+        <form id="loginForm" novalidate>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" name="loginEmail" class="form-input" required />
+                <small class="error-message" style="display: none; color: red;">
+                    Введіть коректну адресу електронної пошти
+                </small>
+            </div>
+            <div class="form-group password-group">
+                <label for="loginPassword">Пароль</label>
+                <div class="password-wrapper">
+                    <input type="password" id="loginPassword" name="loginPassword" class="form-input" required minlength="8" maxlength="25" />
+                </div>
+                <small class="error-message" style="display: none; color: red;">
+                    Пароль повинен містити 8-25 латинських літер або цифр
+                </small>
+            </div>
+            <a href="#" class="forgot-password">Забули пароль?</a>
+            <div class="register-btns-group">
+                <button type="button" class="secondary-btn btn-to-register">Ще не зареєстровані?</button>
+                <button type="submit" class="primary-btn">Увійти</button>
+            </div>
+        </form>
+    </div>
+</div>

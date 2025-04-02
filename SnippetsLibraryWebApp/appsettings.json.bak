@@ -1,0 +1,20 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+
+  "ConnectionStrings": {
+<<<<<<< HEAD
+    "DefaultConnection": "Data Source=DESKTOP-SCTA8OJ;Initial Catalog=SnippetsLibrary;Integrated Security=True;Encrypt=True;Trust Server Certificate=True"
+
+    // "Data Source=.;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+=======
+    "DefaultConnection": "Data Source=.;Initial Catalog=SnipHive;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+>>>>>>> 92926191b060c73058710307ce77050b62882efe
+    //"DefaultConnection": "Server=DESKTOP-SCTA8OJ;Database=SnippetsLibrary;Trusted_Connection=True"
+  }
+}

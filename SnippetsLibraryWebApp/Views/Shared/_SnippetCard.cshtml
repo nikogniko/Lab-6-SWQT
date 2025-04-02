@@ -1,0 +1,115 @@
+﻿@model SnippetsLibraryWebApp.Models.SnippetModel
+@using SnippetsLibraryWebApp.Repository
+@inject ProgrammingLanguageRepository _programmingLanguageRepository
+@inject UserRepository _userRepository
+
+<!-- Views/Snippets/_SnippetCard.cshtml -->
+
+<div class="snippet-card card mb-3">
+    <div class="card-body">
+        <!-- Заголовок та Метаінформація -->
+        <div class="snippet-header">
+            <h3 class="snippet-title">@Model.Title</h3>
+            <div class="snippet-meta">
+                <span class="snippet-language">@await GetProgrammingLanguageName(Model.ProgrammingLanguageID)</span>
+                <span class="snippet-saves">
+                    Збережень:
+                    <i class="fas fa-star"></i> @Model.SavesCount
+                </span>
+            </div>
+        </div>
+
+        <!-- Інформація про Автора або Статус -->
+        <div class="snippet-info">
+            @if (ViewBag.PageType != "MySnippets")
+            {
+                <span class="snippet-author">Автор: @await GetAuthorName(Model.AuthorID)</span>
+            }
+            else
+            {
+                <span class="snippet-status">Статус: @Model.Status.ToUpperInvariant()</span>
+            }
+        </div>
+
+        <!-- Оновлено -->
+        <div class="snippet-updated">
+            Оновлено: @Model.UpdatedAt.ToString("dd.MM.yyyy 'о' HH:mm")
+        </div>
+
+        <!-- Плашки Категорій -->
+        @if (Model.Categories != null && Model.Categories.Any())
+        {
+            <div class="snippet-categories mb-2">
+                @foreach (var category in Model.Categories)
+                {
+                    <span class="badge badge-category me-1">@category.Name</span>
+                }
+            </div>
+        }
+
+        <!-- Плашки Тегів -->
+        @if (Model.Tags != null && Model.Tags.Any())
+        {
+            <div class="snippet-tags mb-2">
+                @foreach (var tag in Model.Tags)
+                {
+                    <span class="badge badge-tag me-1">@tag.Name</span>
+                }
+            </div>
+        }
+
+        <!-- Опис Сніпета -->
+        <div class="snippet-description">
+            <p>@TruncateDescription(Model.Description)</p>
+            <a href="/Snippets/Details/@Model.ID" target="_blank" class="btn btn-primary details-btn">Деталі</a>
+        </div>
+
+        <!-- Модальне Вікно для Видалення (Опціонально) -->
+        <div class="modal fade" id="deleteModal@Model.ID" tabindex="-1" aria-labelledby="deleteModalLabel@Model.ID" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form asp-action="DeleteSnippet" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ID" value="@Model.ID" />
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel@Model.ID">Видалити сніпет</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Ви впевнені, що хочете видалити сніпет "<strong>@Model.Title</strong>"?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                            <button type="submit" class="btn btn-danger">Видалити</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    // Метод для отримання назви мови програмування за її ID
+    public async Task<string> GetProgrammingLanguageName(int id)
+    {
+        var languages = await _programmingLanguageRepository.GetAllProgrammingLanguagesAsync();
+        return languages.Any(x => x.ID == id) ? languages.First(x => x.ID == id).Name : "Unknown";
+    }
+
+    // Метод для отримання імені автора за його ID
+    public async Task<string> GetAuthorName(int authorId)
+    {
+        var username = await _userRepository.GetUsernameByIdAsync(authorId);
+        return username;
+    }
+
+    // Метод для обрізання опису до певної довжини
+    public string TruncateDescription(string description, int maxLength = 100)
+    {
+        if (string.IsNullOrEmpty(description))
+            return string.Empty;
+
+        return description.Length > maxLength ? description.Substring(0, maxLength) + "..." : description;
+    }
+}

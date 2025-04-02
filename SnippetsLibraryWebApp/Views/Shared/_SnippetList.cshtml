@@ -1,0 +1,18 @@
+﻿<!-- Views/Snippets/_SnippetList.cshtml -->
+@model IEnumerable<SnippetsLibraryWebApp.Models.SnippetModel>
+
+<div class="snippets-container">
+    @if (!Model.Any())
+    {
+        <div class="no-snippets">Немає сніпетів для відображення.</div>
+    }
+    else
+    {
+        foreach (var snippet in Model)
+        {
+            <div data-id="@snippet.ID">
+                @Html.Partial("_SnippetCard", snippet)
+            </div>
+        }
+    }
+</div>

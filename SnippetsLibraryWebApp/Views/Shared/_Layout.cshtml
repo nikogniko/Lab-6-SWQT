@@ -1,0 +1,216 @@
+﻿<!-- _Layout.cshtml -->
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <!-- Ваші мета-теги та стилі -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SnipHive</title>
+    <!-- Підключення CSS CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <!-- Теми CodeMirror (опціонально) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/eclipse.min.css">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SnippetsLibraryWebApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <a class="navbar-brand" asp-area="" asp-controller="Snippets" asp-action="AllSnippets">
+                    <h1 class="site-title">SnipHive</h1>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <ul class="navbar-nav flex-grow-1 justify-content-center">
+                    <li class="nav-item active">
+                        <a asp-area="" asp-controller="Snippets" asp-action="AllSnippets" class="nav-link
+                            @(ViewContext.RouteData.Values["controller"].ToString() == "Snippets" && ViewContext.RouteData.Values["action"].ToString() == "AllSnippets" ? "active-link" : "text-style")">
+                            Усі сніпети
+                        </a>
+                    </li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a asp-area="" asp-controller="Snippets" asp-action="FavoriteSnippets" class="nav-link
+                                @(ViewContext.RouteData.Values["controller"].ToString() == "Snippets" && ViewContext.RouteData.Values["action"].ToString() == "FavoriteSnippets" ? "active-link" : "text-style")">
+                                Обрані сніпети
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-area="" asp-controller="Snippets" asp-action="MySnippets" class="nav-link
+                                @(ViewContext.RouteData.Values["controller"].ToString() == "Snippets" && ViewContext.RouteData.Values["action"].ToString() == "MySnippets" ? "active-link" : "text-style")">
+                                Авторські сніпети
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+                <ul class="navbar-nav ml-auto align-items-center">
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item nav-item-login">
+                            <button type="button" class="btn secondary-btn" id="openLoginModal">Увійти</button>
+                        </li>
+                        <li class="nav-item nav-item-register">
+                            <button type="button" class="btn primary-btn" id="openRegisterModal">Зареєструватися</button>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item nav-item-add-snippet">
+                            <a href="@Url.Action("AddSnippet", "Snippets")" class="secondary-btn btn-add-snippet">+ Додати сніпет</a>
+                        </li>
+                        <li class="nav-item dropdown nav-item-user">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                @User.Identity.Name
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">Вийти</button>
+                                </form>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close close-register-modal">&times;</span>
+            <h2 class="modal-title">Реєстрація</h2>
+            <form id="registerForm">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label for="registerUsername">Нікнейм</label>
+                    <input type="text" id="registerUsername" name="registerUsername" class="form-input" required minlength="3" />
+                    <small class="error-message" style="display: none; color: red;">
+                        Нікнейм користувача повинен містити мінімум 3 символи
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email</label>
+                    <input type="email" id="registerEmail" name="registerEmail" class="form-input" required />
+                    <small class="error-message" style="display: none; color: red;">
+                        Введіть коректну адресу електронної пошти
+                    </small>
+                </div>
+                <div class="form-group password-group">
+                    <label for="registerPassword">Пароль</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="registerPassword" name="registerPassword" class="form-input" required minlength="8" maxlength="25" />
+                    </div>
+                    <small class="error-message" style="display: none; color: red;">
+                        Пароль повинен містити 8-25 латинських літер або цифр
+                    </small>
+                </div>
+                <div class="register-btns-group">
+                    <button type="button" class="secondary-btn btn-to-login">Вже зареєстровані?</button>
+                    <button type="submit" class="primary-btn btn-form-register">Зареєструватися</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close close-login-modal">&times;</span>
+            <h2 class="modal-title">Вхід в систему</h2>
+            <form id="loginForm" asp-controller="Account" asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" name="Email" class="form-input" required />
+                    <small class="error-message" style="display: none; color: red;">
+                        Введіть коректну адресу електронної пошти
+                    </small>
+                </div>
+                <div class="form-group password-group">
+                    <label for="loginPassword">Пароль</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" name="Password" class="form-input" required minlength="8" maxlength="25" />
+                    </div>
+                    <small class="error-message" style="display: none; color: red;">
+                        Пароль повинен містити 8-25 латинських літер або цифр
+                    </small>
+                </div>
+                <a href="#" class="forgot-password">Забули пароль?</a>
+                <div class="register-btns-group">
+                    <button type="button" class="secondary-btn btn-to-register">Ще не зареєстровані?</button>
+                    <button type="submit" class="primary-btn">Увійти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <footer class="border-top footer text-muted">
+        <!--div class="container">
+            &copy; 2024 - SnipHive - <a asp-area="" asp-controller="Snippets" asp-action="Privacy">Privacy</a>
+        </!--div-->
+        <div class="container">
+            <!-- Додайте цей блок у _Layout.cshtml або головну сторінку -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <p>Ви увійшли як: @User.Identity.Name</p>
+            }
+            else
+            {
+                <p>Ви не увійшли в систему.</p>
+            }
+        </div>
+    </footer>
+
+    <!-- Include jQuery and Bootstrap JS -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Підключення CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <!-- CodeMirror Основний CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <!-- Мови CodeMirror (наприклад, JavaScript, Python, тощо) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/swift/swift.min.js"></script>
+    <!-- Додаткові плагіни CodeMirror (опціонально) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closetag.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"></script>
+
+    <!-- Теми CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css">
+
+    <!-- Include Custom JavaScript Files -->
+    <script src="~/js/snippets.js"></script>
+    <script src="~/js/login.js"></script>
+    <script src="~/js/registration.js"></script>
+    <script src="~/js/addSnippet.js"></script>
+    <script src="~/js/layout.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

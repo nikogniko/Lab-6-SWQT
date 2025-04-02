@@ -1,0 +1,658 @@
+:root {
+    --dark-accent-color: #058240; /* Темний зелений */
+    --secondary-background-color: #ced6d6; /* #ADCACB Світло-блакиний */
+    --primary-accent-color: #87C159; /* Світлий зелений */
+    --additionally-background-color: #FEE3A2; /* Світло-жовтий */
+    --secondary-accent-color: #F3C301; /* Жовтий */
+}
+
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+a {
+    color: var(--dark-accent-color);
+}
+    a:hover {
+        color: var(--primary-accent-color);
+    }
+
+.nav-item .nav-link {
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+}
+
+.nav-item .nav-link.text-style {
+    color: var(--bs-body-color) !important;
+    font-weight: 500 !important;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.nav-item:hover .nav-link.text-style {
+    color: var(--primary-accent-color) !important;
+}
+
+.nav-item:hover .nav-link.active-link {
+    color: var(--primary-accent-color) !important;
+}
+.nav-item:hover .nav-link.active-link::after {
+    background-color: var(--primary-accent-color) !important;
+}
+
+/* Стилі для активного посилання */
+.nav-item .nav-link.active-link {
+    color: var(--dark-accent-color) !important; /* Темний зелений колір */
+    font-weight: bold !important;
+    position: relative !important;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    /* Псевдоелемент (заокруглена риска) */
+    .nav-item .nav-link.active-link::after {
+        content: "";
+        display: block !important;
+        width: calc(100% - 16px); /* Довжина риски */
+        height: 4px; /* Товщина риски */
+        background-color: var(--dark-accent-color) !important; /* Темний зелений колір */
+        border-radius: 2px; /* Заокруглення */
+        position: absolute;
+        bottom: -2px; /* Відступ від тексту */
+        left: 50%;
+        transform: translateX(-50%);
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+
+/* Стилі кнопок */
+.secondary-btn, .primary-btn {
+    display: inline-block;
+    min-width: 120px;
+    padding: 5px 15px;
+    border-radius: 20px; /* Заокруглення кутів */
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+    margin: 5px; /* Відступ між кнопками */
+}
+
+/* Кнопка входу */
+.secondary-btn {
+    background-color: #fff; /* Білий фон */
+    color: var(--dark-accent-color); /* Темно-зелений текст */
+    border: 2px solid var(--dark-accent-color); /* Темно-зелений бордер */
+}
+
+/* Кнопка реєстрації */
+.primary-btn {
+    background-color: var(--dark-accent-color); /* Темно-зелений фон */
+    color: #fff; /* Білий текст */
+    border: 2px solid var(--dark-accent-color); /* Темно-зелений бордер */
+}
+
+    .primary-btn:hover,
+    .secondary-btn:hover{
+        background-color: var(--primary-accent-color); /* Зміна на зелений фон при наведенні */
+        border-color: var(--primary-accent-color); /* Світло-зелений бордер */
+        color: #fff; /* Білий текст при наведенні */
+    }
+
+
+
+/* Стилі для форми реєстрації */
+
+/* Загальний стиль модального вікна */
+.modal {
+    display: none; /* Приховано за замовчуванням */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Напівпрозорий чорний фон */
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.modal-title {
+/*    text-align: center;*/ 
+    color: var(--dark-accent-color);
+    margin-bottom: 10px;
+    font-size: 26px;
+}
+
+.close {
+    position: absolute;
+    top: 6px;
+    right: 18px;
+    font-size: 24px;
+    color: grey;
+    cursor: pointer;
+}
+    .close:hover{
+        color: var(--primary-accent-color);
+    }
+
+
+
+form-group {
+    margin-bottom: 15px;
+}
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+.form-group label {
+    display: block;
+    margin: 10px 0px;
+    transition: color 0.3s;
+}
+
+.form-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--primary-accent-color);
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+.form-group:focus-within .form-input {
+    border: 3px solid var(--dark-accent-color);
+    outline: none; /* Вимкнення стандартного контуру браузера */
+}
+
+.form-group:focus-within label {
+    color: var(--dark-accent-color);
+}
+
+.register-btns-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+
+.btn-to-login,
+.btn-to-register {
+    border-color: transparent;
+}
+
+    .btn-to-login:hover,
+    .btn-to-register:hover{
+        background-color: transparent;
+        border-color: var(--primary-accent-color);
+        color: var(--primary-accent-color);
+    }
+
+.forgot-password {
+    display: block;
+    margin: 10px 0px 0px 5px;
+    font-size: 14px;
+    text-decoration: none;
+}
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.registration-form {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid var(--secondary-background-color);
+    border-radius: 10px;
+    background-color: var(--additionally-background-color);
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.form-input.error {
+    border-color: red;
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    display: none;
+}
+
+/*кнопка-посилання на сторінку додавання сніпета*/
+
+.btn-add-snippet {
+    text-decoration: none;
+    font-weight: 500;
+    border-color: transparent;
+    background-color: transparent;
+    transition: color 0.3s;
+}
+
+    .btn-add-snippet:hover {
+        background-color: transparent;
+        border-color: var(--primary-accent-color);
+        color: var(--primary-accent-color);
+    }
+
+
+/* Базовий стиль для випадаючого меню користувача */
+.nav-item.dropdown {
+    position: relative;
+}
+
+/* Стилі для посилання з іменем користувача */
+.nav-link.dropdown-toggle {
+    color: #ffffff; /* Колір тексту */
+    padding: 8px 15px !important;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+    /* Зміна фону при наведенні миші */
+    .nav-link.dropdown-toggle:hover {
+        color: var(--primary-accent-color) !important; /* Збереження кольору тексту */
+        border-radius: 20px;
+    }
+
+/* Стилі для випадаючого меню */
+.dropdown-menu {
+    background-color: #ffffff; /* Білий фон */
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    padding: 0;
+    min-width: 150px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    /* Елементи випадаючого меню */
+    .dropdown-menu .dropdown-item {
+        padding: 10px 15px;
+        color: #333333;
+        text-decoration: none;
+        display: block;
+        transition: background-color 0.3s;
+    }
+
+        /* Зміна кольору при наведенні */
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #f0f0f0; /* Світло-сірий фон при наведенні */
+            color: #000000; /* Збереження кольору тексту */
+        }
+
+/* Адаптація для мобільних пристроїв */
+@media (max-width: 768px) {
+    .nav-link.dropdown-toggle {
+        padding: 8px 10px;
+    }
+
+    .dropdown-menu {
+        min-width: 100px;
+    }
+}
+
+
+
+/* СТОРІНКА ДОДАВАННЯ НОВОГО СНІПЕТА */
+
+/* Основні стилі сторінки */
+body .container{
+    max-width: 1300px;
+}
+
+.page-container {
+    background-color: var(--secondary-background-color); /*#f3f4f6;  Приглушений фон */
+    padding: 20px 30px;
+    border-radius: 10px;
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-sections-container {
+    display: flex;
+    gap: 20px;
+}
+
+.form-details-section,
+.form-code-section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+
+
+/* Загальні стилі для контейнера форми */
+/*.snippet-form-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #ebf3ea;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}*/
+
+    /* Стиль заголовка */
+    /*.snippet-form-container h1 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+        text-align: center;
+    }*/
+
+
+/* Стилі для груп полів форми */
+/*snippet-form-container .form-group {
+    margin-bottom: 20px;
+}*/
+
+    /* Стилі для міток */
+    /*snippet-form-container .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }*/
+
+/* Позначення обов'язкових полів */
+.required {
+    color: red;
+}
+
+/* Поля введення тексту */
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    /*font-size: 16px;*/
+}
+
+/* Поле для тексту з описом */
+/*textarea.form-control {
+    height: 100px;
+    resize: vertical;
+}*/
+
+/* Стилі для випадаючого списку з пошуком */
+.select-search {
+    width: 100%;
+    padding: 10px;
+    /*border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;*/
+}
+
+/* Стилі для радіо кнопок */
+/*.status-radio-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+    .status-radio-group input[type="radio"] {
+        margin-right: 5px;
+    }*/
+
+/* Стилі для перемикачів статусу */
+.status-toggle-group {
+    display: flex;
+    gap: 10px;
+}
+
+.toggle-label {
+    display: inline-block;
+    padding: 5px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+input[type="radio"]:checked + .toggle-label {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Стилі для редактора коду */
+/*.code-editor-container {
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.code-editor {
+    width: 100%;
+    height: 150px;
+    background-color: #2e3b4e;
+    color: #f8f8f2;
+    padding: 10px;
+    border: none;
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+    line-height: 1.5;
+    outline: none;
+    white-space: pre;
+    overflow: auto;
+}*/
+
+/* Список вибраних категорій та тегів */
+/*.selected-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+    .selected-list .selected-item {
+        background-color: #e3f2fd;
+        padding: 5px 10px;
+        border: 1px solid #90caf9;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+    }
+
+        .selected-list .selected-item .remove-item {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #e53935;
+            font-weight: bold;
+        }*/
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/*.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}*/
+
+
+/* Стилі для кнопок */
+/*.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.primary-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+    .primary-btn:hover {
+        background-color: #0056b3;
+    }
+
+.secondary-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    margin-left: 10px;
+}
+
+    .secondary-btn:hover {
+        background-color: #495057;
+    }*/
+
+
+
+
+
+/* Стилі для категорій */
+.category-select-container {
+    position: relative;
+}
+
+.custom-dropdown {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.dropdown-placeholder {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.checkbox-label {
+    display: block;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.selected-list {
+    margin-top: 10px;
+}
+
+.selected-category {
+    display: inline-block;
+    padding: 5px 10px;
+    margin-right: 5px;
+    margin-top: 5px;
+    background-color: #e0f2e9;
+    color: #005500;
+    border: 1px solid #005500;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+    .selected-category .remove-icon {
+        margin-left: 5px;
+        color: #666;
+        cursor: pointer;
+    }
+
+}
+
+
+/* Стилі для блоку коду */
+
+.code-editor-container {
+    background-color: #2d2d2d;
+    color: #f8f8f2;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.code-editor {
+    background: transparent;
+    color: inherit;
+    border: none;
+    width: 100%;
+    height: 200px;
+    resize: none;
+    outline: none;
+}
+
+/* Стилі для кнопок */
+/*.btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.primary-btn {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.secondary-btn {
+    background-color: #ccc;
+    color: #000;
+}
+*/
