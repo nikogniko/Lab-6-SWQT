@@ -8,7 +8,7 @@ on:
       - main
 jobs:
   build:
-    name: Build and Analyze
+    name: Build
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -25,7 +25,7 @@ jobs:
         run: dotnet build --configuration Release
 
   analysis:
-    name: Analysis (SonarCloud & Cloc)
+    name: Analysis
     runs-on: windows-latest
     needs: build
     steps:
@@ -39,7 +39,7 @@ jobs:
         with:
           script: |
             const prNumber = context.issue.number;
-            const { data: reviews } = await github.pulls.listReviews({
+            const { data: reviews } = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber
