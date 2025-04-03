@@ -1,5 +1,9 @@
 name: CI Pipeline
 
+permissions:
+  issues: write
+  pull-requests: write
+
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize, review_requested]
@@ -7,30 +11,9 @@ on:
       - develop
       - main
 jobs:
-  review-check:
-    name: Code Review Check for develop
-    runs-on: windows-latest
-    steps:
-      - name: Check if PR has approved review
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-            const { data: reviews } = await github.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            const approved = reviews.some(review => review.state === 'APPROVED');
-            if (!approved) {
-              core.setFailed("Код-рев’ю не схвалено");
-            }
-
   build:
-    name: Build and Analyze
+    name: Build
     runs-on: windows-latest
-    needs: review-check
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -46,7 +29,7 @@ jobs:
         run: dotnet build --configuration Release
 
   analysis:
-    name: Analysis (SonarCloud & Cloc)
+    name: Analysis
     runs-on: windows-latest
     needs: build
     steps:
@@ -54,6 +37,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Check if PR has approved review
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            const approved = reviews.some(review => review.state === 'APPROVED');
+            if (!approved) {
+              core.setFailed("Код-рев’ю не схвалено");
+            }
 
       - name: Cache SonarQube Cloud packages
         uses: actions/cache@v4
@@ -94,6 +92,13 @@ jobs:
           cloc src/ > cloc-report.txt
           Get-Content cloc-report.txt
 
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"   
+
       # --- Перевірка форматування коду ---
       - name: Check code formatting with dotnet format
         id: format_check
@@ -126,13 +131,3 @@ jobs:
               issue_number: context.issue.number,
               body: `**Formatting issues found:**${formattingOutput}`
             });
-
-      # --- Завершення аналізу SonarCloud ---
-
-      - name: End SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
-    
