@@ -84,13 +84,6 @@ jobs:
       - name: Rebuild project for analysis
         run: dotnet build --configuration Release
 
-      - name: End SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
-
       - name: Count lines of code with Cloc
         shell: powershell
         run: |
@@ -130,4 +123,10 @@ jobs:
               issue_number: context.issue.number,
               body: `**Formatting issues found:**${formattingOutput}`
             });
-    
+
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"   
