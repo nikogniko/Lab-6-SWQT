@@ -1,0 +1,138 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, review_requested]
+    branches:
+      - develop
+      - main
+jobs:
+  review-check:
+    name: Code Review Check for develop
+    runs-on: windows-latest
+    steps:
+      - name: Check if PR has approved review
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const { data: reviews } = await github.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            const approved = reviews.some(review => review.state === 'APPROVED');
+            if (!approved) {
+              core.setFailed("Код-рев’ю не схвалено");
+            }
+
+  build:
+    name: Build and Analyze
+    runs-on: windows-latest
+    needs: review-check
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Забезпечуємо повну історію для аналізу
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0'  # Вкажіть потрібну версію .NET
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+  analysis:
+    name: Analysis (SonarCloud & Cloc)
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Cache SonarQube Cloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache SonarQube Cloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v4
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarQube Cloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory -Force
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
+      - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"nikogniko_Lab-6-SWQT" /o:"veronika-gorbach" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.login="$env:SONAR_TOKEN"
+
+      - name: Rebuild project for analysis
+        run: dotnet build --configuration Release
+
+      - name: Count lines of code with Cloc
+        shell: powershell
+        run: |
+          choco install cloc -y
+          cloc src/ > cloc-report.txt
+          Get-Content cloc-report.txt
+
+      # --- Перевірка форматування коду ---
+      - name: Check code formatting with dotnet format
+        id: format_check
+        continue-on-error: true
+        shell: powershell
+        run: |
+          # Виконуємо перевірку форматування
+          $formatOutput = dotnet format --verify-no-changes 2>&1
+          Write-Output $formatOutput
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "Formatting issues detected"
+            # Записуємо результат для подальшого використання
+            echo "result<<EOF" >> $env:GITHUB_OUTPUT
+            echo $formatOutput >> $env:GITHUB_OUTPUT
+            echo "EOF" >> $env:GITHUB_OUTPUT
+            exit 0
+          } else {
+            echo "result=No formatting issues found" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Comment on formatting issues if any
+        if: steps.format_check.outputs.result != 'No formatting issues found'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const formattingOutput = `\n${{ steps.format_check.outputs.result }}`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `**Formatting issues found:**${formattingOutput}`
+            });
+
+      # --- Завершення аналізу SonarCloud ---
+
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
+    
