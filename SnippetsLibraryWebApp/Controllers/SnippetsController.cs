@@ -187,34 +187,7 @@ namespace SnippetsLibraryWebApp.Controllers
         {
             if (!ModelState.IsValid)
             {
-                if (model.Categories == null || model.Categories.Count() == 0)
-                {
-                    model.Categories = new List<CategoryModel>();
-
-                    if(selectedCategories.Length > 0)
-                    {
-                        foreach(var categoryId in selectedCategories)
-                        {
-                            model.Categories.Add(await _categoryRepository.GetCategoryByIdAsync(categoryId));
-                        }
-                    }
-                }
-
-                if (model.Tags == null || model.Tags.Count() == 0)
-                {
-                    model.Tags = new List<TagModel>();
-
-                    if (selectedTags.Length > 0)
-                    {
-                        foreach (var tagId in selectedTags)
-                        {
-                            model.Tags.Add(await _tagRepository.GetTagsByIdAsync(tagId));
-                        }
-                    }
-                }
-                // Повторно завантажити категорії та теги, якщо модель не валідна
-                //model.Categories = (await _categoryRepository.GetCategoriesBySnippetIdAsync(model.ID)).ToList();
-                //model.Tags = (await _tagRepository.GetTagsBySnippetIdAsync(model.ID)).ToList();
+                await PopulateCategoriesAndTagsAsync(model, selectedCategories, selectedTags);
             }
 
             var existingSnippet = await _snippetsRepository.GetSnippetByIdAsync(model.ID);
@@ -223,45 +196,63 @@ namespace SnippetsLibraryWebApp.Controllers
                 return Forbid();
             }
 
-            var areCategoriesChanged = existingSnippet.Categories.Count() != model.Categories.Count();
-            var areTagsChanged = existingSnippet.Tags.Count() != model.Tags.Count();
+            bool areCategoriesChanged = CollectionsChanged(existingSnippet.Categories, model.Categories);
+            bool areTagsChanged = CollectionsChanged(existingSnippet.Tags, model.Tags);
 
-            for(var i = 0; i < Math.Min(existingSnippet.Categories.Count(), model.Categories.Count()); i++)
+            UpdateSnippet(existingSnippet, model);
+
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            bool result = await _snippetsRepository.UpdateSnippetAsync(existingSnippet, userId, areCategoriesChanged, areTagsChanged);
+
+            return Json(new { success = result, formType = "edit" });
+
+            // Локальний метод для завантаження категорій та тегів
+            async Task PopulateCategoriesAndTagsAsync(EditSnippetViewModel m, int[] selCategories, int[] selTags)
             {
-                if (existingSnippet.Categories.ElementAt(i).ID != model.Categories.ElementAt(i).ID)
+                if (m.Categories == null || !m.Categories.Any())
                 {
-                    areCategoriesChanged = true;
+                    m.Categories = new List<CategoryModel>();
+                    if (selCategories != null && selCategories.Length > 0)
+                    {
+                        foreach (var categoryId in selCategories)
+                        {
+                            m.Categories.Add(await _categoryRepository.GetCategoryByIdAsync(categoryId));
+                        }
+                    }
+                }
+
+                if (m.Tags == null || !m.Tags.Any())
+                {
+                    m.Tags = new List<TagModel>();
+                    if (selTags != null && selTags.Length > 0)
+                    {
+                        foreach (var tagId in selTags)
+                        {
+                            m.Tags.Add(await _tagRepository.GetTagsByIdAsync(tagId));
+                        }
+                    }
                 }
             }
 
-            for (var i = 0; i < Math.Min(existingSnippet.Tags.Count(), model.Tags.Count()); i++)
+            // Локальний метод для порівняння колекцій за ID
+            bool CollectionsChanged<T>(IEnumerable<T> existing, IEnumerable<T> updated) where T : class
             {
-                if (existingSnippet.Tags.ElementAt(i).ID != model.Tags.ElementAt(i).ID)
-                {
-                    areTagsChanged = true;
-                }
+                var existingIds = existing.Select(e => (int)typeof(T).GetProperty("ID").GetValue(e));
+                var updatedIds = updated.Select(u => (int)typeof(T).GetProperty("ID").GetValue(u));
+                return !existingIds.SequenceEqual(updatedIds);
             }
 
-            // Оновлення полів сніпета
-            existingSnippet.Title = model.Title;
-            existingSnippet.Description = model.Description;
-            existingSnippet.ProgrammingLanguageID = model.ProgrammingLanguageID;
-            existingSnippet.Status = model.Status;
-            existingSnippet.Code = model.Code;
-            existingSnippet.UpdatedAt = DateTime.UtcNow;
-            existingSnippet.Tags = model.Tags;
-            existingSnippet.Categories = model.Categories;
-
-            // Збереження змін
-            var result = await _snippetsRepository.UpdateSnippetAsync(existingSnippet, int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value), areCategoriesChanged, areTagsChanged);
-
-            if (result)
+            // Локальний метод для оновлення полів сніпета
+            void UpdateSnippet(Snippet existing, EditSnippetViewModel m)
             {
-                return Json(new { success = true, formType = "edit" });
-            }
-            else
-            {
-                return Json(new { success = false, formType = "edit" });
+                existing.Title = m.Title;
+                existing.Description = m.Description;
+                existing.ProgrammingLanguageID = m.ProgrammingLanguageID;
+                existing.Status = m.Status;
+                existing.Code = m.Code;
+                existing.UpdatedAt = DateTime.UtcNow;
+                existing.Tags = m.Tags;
+                existing.Categories = m.Categories;
             }
         }
 
