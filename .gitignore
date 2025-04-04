@@ -4,3 +4,4 @@
 /SnippetsLibraryWebApp/appsettings.Development.json
 /SnippetsLibraryWebApp/appsettings.json
 .sonarqube/
+sonar-project.properties

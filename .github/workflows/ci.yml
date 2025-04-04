@@ -1,5 +1,9 @@
 name: CI Pipeline
 
+permissions:
+  issues: write
+  pull-requests: write
+
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize, review_requested]
@@ -7,46 +11,25 @@ on:
       - develop
       - main
 jobs:
-  review-check:
-    name: Code Review Check for develop
-    runs-on: windows-latest
-    steps:
-      - name: Check if PR has approved review
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const prNumber = context.issue.number;
-            const { data: reviews } = await github.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            const approved = reviews.some(review => review.state === 'APPROVED');
-            if (!approved) {
-              core.setFailed("Код-рев’ю не схвалено");
-            }
-
   build:
-    name: Build and Analyze
+    name: Build
     runs-on: windows-latest
-    needs: review-check
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Забезпечуємо повну історію для аналізу
+          fetch-depth: 0  # Г‡Г ГЎГҐГ§ГЇГҐГ·ГіВєГ¬Г® ГЇГ®ГўГ­Гі ВіГ±ГІГ®Г°ВіГѕ Г¤Г«Гї Г Г­Г Г«ВіГ§Гі
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.0'  # Вкажіть потрібну версію .NET
+          dotnet-version: '8.0'  # Г‚ГЄГ Г¦ВіГІГј ГЇГ®ГІГ°ВіГЎГ­Гі ГўГҐГ°Г±ВіГѕ .NET
 
       - name: Build project
         run: dotnet build --configuration Release
 
   analysis:
-    name: Analysis (SonarCloud & Cloc)
+    name: Analysis
     runs-on: windows-latest
     needs: build
     steps:
@@ -54,6 +37,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Check if PR has approved review
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            const approved = reviews.some(review => review.state === 'APPROVED');
+            if (!approved) {
+              core.setFailed("ГЉГ®Г¤-Г°ГҐГўвЂ™Гѕ Г­ГҐ Г±ГµГўГ Г«ГҐГ­Г®");
+            }
 
       - name: Cache SonarQube Cloud packages
         uses: actions/cache@v4
@@ -99,20 +97,20 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"   
 
-      # --- Перевірка форматування коду ---
+      # --- ГЏГҐГ°ГҐГўВіГ°ГЄГ  ГґГ®Г°Г¬Г ГІГіГўГ Г­Г­Гї ГЄГ®Г¤Гі ---
       - name: Check code formatting with dotnet format
         id: format_check
         continue-on-error: true
         shell: powershell
         run: |
-          # Виконуємо перевірку форматування
+          # Г‚ГЁГЄГ®Г­ГіВєГ¬Г® ГЇГҐГ°ГҐГўВіГ°ГЄГі ГґГ®Г°Г¬Г ГІГіГўГ Г­Г­Гї
           $formatOutput = dotnet format --verify-no-changes 2>&1
           Write-Output $formatOutput
           if ($LASTEXITCODE -ne 0) {
             Write-Output "Formatting issues detected"
-            # Записуємо результат для подальшого використання
+            # Г‡Г ГЇГЁГ±ГіВєГ¬Г® Г°ГҐГ§ГіГ«ГјГІГ ГІ Г¤Г«Гї ГЇГ®Г¤Г Г«ГјГёГ®ГЈГ® ГўГЁГЄГ®Г°ГЁГ±ГІГ Г­Г­Гї
             echo "result<<EOF" >> $env:GITHUB_OUTPUT
             echo $formatOutput >> $env:GITHUB_OUTPUT
             echo "EOF" >> $env:GITHUB_OUTPUT
