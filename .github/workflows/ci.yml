@@ -18,12 +18,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Забезпечуємо повну історію для аналізу
+          fetch-depth: 0  # Г‡Г ГЎГҐГ§ГЇГҐГ·ГіВєГ¬Г® ГЇГ®ГўГ­Гі ВіГ±ГІГ®Г°ВіГѕ Г¤Г«Гї Г Г­Г Г«ВіГ§Гі
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.0'  # Вкажіть потрібну версію .NET
+          dotnet-version: '8.0'  # Г‚ГЄГ Г¦ВіГІГј ГЇГ®ГІГ°ВіГЎГ­Гі ГўГҐГ°Г±ВіГѕ .NET
 
       - name: Build project
         run: dotnet build --configuration Release
@@ -50,7 +50,7 @@ jobs:
             });
             const approved = reviews.some(review => review.state === 'APPROVED');
             if (!approved) {
-              core.setFailed("Код-рев’ю не схвалено");
+              core.setFailed("ГЉГ®Г¤-Г°ГҐГўвЂ™Гѕ Г­ГҐ Г±ГµГўГ Г«ГҐГ­Г®");
             }
 
       - name: Cache SonarQube Cloud packages
@@ -99,18 +99,18 @@ jobs:
         run: |
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="$env:SONAR_TOKEN"   
 
-      # --- Перевірка форматування коду ---
+      # --- ГЏГҐГ°ГҐГўВіГ°ГЄГ  ГґГ®Г°Г¬Г ГІГіГўГ Г­Г­Гї ГЄГ®Г¤Гі ---
       - name: Check code formatting with dotnet format
         id: format_check
         continue-on-error: true
         shell: powershell
         run: |
-          # Виконуємо перевірку форматування
+          # Г‚ГЁГЄГ®Г­ГіВєГ¬Г® ГЇГҐГ°ГҐГўВіГ°ГЄГі ГґГ®Г°Г¬Г ГІГіГўГ Г­Г­Гї
           $formatOutput = dotnet format --verify-no-changes 2>&1
           Write-Output $formatOutput
           if ($LASTEXITCODE -ne 0) {
             Write-Output "Formatting issues detected"
-            # Записуємо результат для подальшого використання
+            # Г‡Г ГЇГЁГ±ГіВєГ¬Г® Г°ГҐГ§ГіГ«ГјГІГ ГІ Г¤Г«Гї ГЇГ®Г¤Г Г«ГјГёГ®ГЈГ® ГўГЁГЄГ®Г°ГЁГ±ГІГ Г­Г­Гї
             echo "result<<EOF" >> $env:GITHUB_OUTPUT
             echo $formatOutput >> $env:GITHUB_OUTPUT
             echo "EOF" >> $env:GITHUB_OUTPUT
