@@ -13,13 +13,15 @@ namespace SnippetsLibraryWebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        //private readonly ILogger<HomeController> _logger;
         private readonly UserRepository _userRepository;
         private readonly SnippetRepository _snippetRepository;
 
-        public HomeController(ILogger<HomeController> logger, UserRepository userRepository, SnippetRepository snippetRepository)
+        //public HomeController(ILogger<HomeController> logger, UserRepository userRepository, SnippetRepository snippetRepository)
+
+        public HomeController(UserRepository userRepository, SnippetRepository snippetRepository)
         {
-            _logger = logger;
+            //_logger = logger;
             _userRepository = userRepository;
             _snippetRepository = snippetRepository;
         }
