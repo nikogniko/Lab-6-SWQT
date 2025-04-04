@@ -243,7 +243,7 @@ namespace SnippetsLibraryWebApp.Controllers
             }
 
             // Локальний метод для оновлення полів сніпета
-            void UpdateSnippet(Snippet existing, EditSnippetViewModel m)
+            void UpdateSnippet(SnippetModel existing, EditSnippetViewModel m)
             {
                 existing.Title = m.Title;
                 existing.Description = m.Description;
